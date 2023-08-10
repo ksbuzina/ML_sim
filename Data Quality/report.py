@@ -10,6 +10,18 @@ LimitType = Dict[str, Tuple[float, float]]
 CheckType = Tuple[str, Metric, LimitType]
 
 
+def memoize(func: Callable) -> Callable:
+    cache = {}
+    
+    def memoized_func(*args, **kwargs):
+        key = str(args)+ str(kwargs)
+        if key not in cache:
+            cache[key] = func(*args, **kwargs)
+        return cache[key]
+    
+    return memoized_func
+
+
 class Report:
     """DQ report class."""
 
@@ -20,6 +32,7 @@ class Report:
         self.checklist = checklist
         self.engine = engine
 
+    @memoize
     def fit(self, tables: Dict[str, pd.DataFrame]) -> Dict:
         """Calculate DQ metrics and build report."""
         self.report_ = {
